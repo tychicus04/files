@@ -1,36 +1,46 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-int main(){
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
+int N, K, bits[25];
+long long cnt;
+string body;
 
-    int T;
-    cin >> T;
-    for (int tc = 0; tc < T; tc++) {
-        int N, K;
-        cin >> N >> K;
+// true if the string has a MAXIMAL block of zeros whose length is exactly K
+bool ok() {
+    int i = 0;
+    while (i < N) {
+        if (bits[i] == 0) {
+            int j = i;
+            while (j < N && bits[j] == 0) j++;
+            if (j - i == K) return true;
+            i = j;
+        } else i++;
+    }
+    return false;
+}
 
-        vector<string> results;
-        // Sinh tất cả xâu nhị phân độ dài N bằng cách duyệt mask từ 0 -> 2^N - 1
-        for (long long mask = 0; mask < (1LL << N); mask++) {
-            string s(N, '0');
-            for (int i = 0; i < N; i++) {
-                if (mask & (1LL << (N - 1 - i))) s[i] = '1';
-            }
-            // Đếm số dãy 0 liên tiếp có độ dài đúng bằng K
-            int run = 0, cnt = 0;
-            for (int i = 0; i < N; i++) {
-                if (s[i] == '0') run++;
-                else { if (run == K) cnt++; run = 0; }
-            }
-            if (run == K) cnt++; // dãy 0 ở cuối xâu
-            if (cnt == 1) results.push_back(s);
+void gen(int pos) {
+    if (pos == N) {
+        if (ok()) {
+            cnt++;
+            for (int i = 0; i < N; i++) { if (i) body += ' '; body += char('0' + bits[i]); }
+            body += '\n';
         }
+        return;
+    }
+    bits[pos] = 0; gen(pos + 1);   // 0 first -> lexicographic order
+    bits[pos] = 1; gen(pos + 1);
+}
 
-        cout << results.size() << "\n";
-        for (auto &s : results) cout << s << "\n";
-        if (tc != T - 1) cout << "\n"; // dòng trống giữa các bộ test
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int T; if (!(cin >> T)) return 0;
+    for (int t = 0; t < T; t++) {
+        cin >> N >> K;
+        cnt = 0; body.clear();
+        gen(0);
+        if (t) cout << "\n";                 // blank line between test cases
+        cout << cnt << "\n" << body;
     }
     return 0;
 }
