@@ -5,18 +5,18 @@ int N, K, bits[25];
 long long cnt;
 string body;
 
-// true if the string has a MAXIMAL block of zeros whose length is exactly K
+// true iff the string has EXACTLY ONE maximal block of zeros whose length is exactly K
 bool ok() {
-    int i = 0;
+    int found = 0, i = 0;
     while (i < N) {
         if (bits[i] == 0) {
             int j = i;
             while (j < N && bits[j] == 0) j++;
-            if (j - i == K) return true;
+            if (j - i == K) { if (++found > 1) return false; }
             i = j;
         } else i++;
     }
-    return false;
+    return found == 1;
 }
 
 void gen(int pos) {

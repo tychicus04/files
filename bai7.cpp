@@ -3,22 +3,18 @@ using namespace std;
 
 int main() {
     ios::sync_with_stdio(false); cin.tie(nullptr);
-    int n; if (!(cin >> n)) return 0;
-    vector<long long> a(n), pre(n + 1, 0);
-    for (int i = 0; i < n; i++) { cin >> a[i]; pre[i + 1] = pre[i] + a[i]; }
-
-    // dp[i][j] = max score the player to move can get from a[i..j] (both play optimally)
-    vector<vector<long long>> dp(n, vector<long long>(n, 0));
-    for (int i = 0; i < n; i++) dp[i][i] = a[i];
-    for (int len = 2; len <= n; len++)
-        for (int i = 0; i + len - 1 < n; i++) {
-            int j = i + len - 1;
-            long long pickL = a[i] + (pre[j + 1] - pre[i + 1]) - dp[i + 1][j];
-            long long pickR = a[j] + (pre[j]     - pre[i])     - dp[i][j - 1];
-            dp[i][j] = max(pickL, pickR);
-        }
-
-    long long ti = dp[0][n - 1];         // Ti moves first
-    cout << ti << " " << (pre[n] - ti) << "\n";
+    int n;
+    while (cin >> n) {                       // read until EOF (handles multi-test files)
+        vector<long long> A(n), dp(n);
+        long long total = 0;
+        for (int i = 0; i < n; i++) { cin >> A[i]; total += A[i]; dp[i] = A[i]; }
+        // dp[i] = best (mover - opponent) difference on A[i..j] as j grows
+        for (int j = 1; j < n; j++)
+            for (int i = j - 1; i >= 0; i--)
+                dp[i] = max(A[i] - dp[i + 1], A[j] - dp[i]);
+        long long diff = dp[0];
+        long long ti = (total + diff) / 2, teo = (total - diff) / 2;
+        cout << ti << " " << teo << "\n";
+    }
     return 0;
 }
