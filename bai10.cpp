@@ -1,22 +1,34 @@
+// BAI 10 - HINH CHU NHAT LON NHAT (largest rectangle in histogram)
 #include <bits/stdc++.h>
 using namespace std;
 
 int main() {
-    ios::sync_with_stdio(false); cin.tie(nullptr);
-    long long N, K;
-    if (!(cin >> N >> K)) return 0;
-    vector<int> len(N);
-    for (int i = 0; i < N; i++) { string s; cin >> s; len[i] = (int)s.size(); }
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
 
-    unordered_map<int, long long> freq;         // name-length -> count inside current window
-    freq.reserve(2048);
-    long long ans = 0;
-    for (long long i = 0; i < N; i++) {
-        if (i - K - 1 >= 0) freq[len[i - K - 1]]--;   // drop the element now too far (dist K+1)
-        auto it = freq.find(len[i]);                  // window holds positions [i-K, i-1]
-        if (it != freq.end()) ans += it->second;      // pairs (j, i) with dist <= K, equal length
-        freq[len[i]]++;
+    int t;
+    if (!(cin >> t)) return 0;
+
+    while (t--) {
+        int n;
+        cin >> n;
+        vector<long long> h(n + 1);
+        for (int i = 0; i < n; i++) cin >> h[i];
+        h[n] = 0;                       // cot "ao" cao 0 de xa het stack
+
+        stack<int> st;                  // chi so, chieu cao TANG dan
+        long long best = 0;
+
+        for (int i = 0; i <= n; i++) {
+            while (!st.empty() && h[st.top()] >= h[i]) {
+                long long ht = h[st.top()]; st.pop();
+                int left = st.empty() ? -1 : st.top();   // bien trai (khong tinh)
+                long long width = i - left - 1;
+                best = max(best, ht * width);
+            }
+            st.push(i);
+        }
+        cout << best << '\n';
     }
-    cout << ans << "\n";
     return 0;
 }

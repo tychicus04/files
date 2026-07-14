@@ -1,16 +1,31 @@
+// BAI 8 - NHIP CHUNG KHOAN (stock span)
 #include <bits/stdc++.h>
 using namespace std;
 
 int main() {
-    int a, b;
-    if (scanf("%d %d", &a, &b) != 2) return 0;
-    const int N = 1000000;
-    static int s[N + 1];                       // s[x] = sum of proper divisors of x
-    for (int i = 1; i <= N; i++)
-        for (int j = 2 * i; j <= N; j += i)
-            s[j] += i;
-    int cnt = 0;
-    for (int x = a; x <= b; x++) if (s[x] > x) cnt++;   // abundant number
-    printf("%d\n", cnt);
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t;
+    if (!(cin >> t)) return 0;
+
+    while (t--) {
+        int n;
+        cin >> n;
+        vector<int> a(n);
+        for (auto &x : a) cin >> x;
+
+        vector<int> b(n);
+        stack<int> st;                  // luu chi so, gia GIAM dan tu day len
+
+        for (int i = 0; i < n; i++) {
+            // bo het cac ngay co gia <= a[i]  (chung deu bi "phu" boi ngay i)
+            while (!st.empty() && a[st.top()] <= a[i]) st.pop();
+            b[i] = st.empty() ? (i + 1) : (i - st.top());
+            st.push(i);
+        }
+
+        for (int i = 0; i < n; i++) cout << b[i] << " \n"[i == n - 1];
+    }
     return 0;
 }
