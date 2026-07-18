@@ -1,34 +1,41 @@
-// BAI 9 - NHAY SANG PHAI: dp tren "next greater element"
+// BAI 9: N so "nguyen thuy" dau tien: so chu so chan, chi gom 4/5, doi xung
+// => sinh nua trai (moi bit: 0->'4', 1->'5') roi lay doi xung guong
 #include <bits/stdc++.h>
 using namespace std;
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    int n, q;
-    if (!(cin >> n >> q)) return 0;
-    vector<long long> h(n + 1);
-    for (int i = 1; i <= n; i++) cin >> h[i];
-
-    vector<int> nxt(n + 2, 0);          // cot gan nhat ben phai co chieu cao lon hon
-    vector<long long> dp(n + 2, 0);     // so buoc nhay toi da khi xuat phat tu i
-    stack<int> st;
-
-    for (int i = n; i >= 1; i--) {
-        while (!st.empty() && h[st.top()] <= h[i]) st.pop();
-        nxt[i] = st.empty() ? 0 : st.top();
-        dp[i] = (nxt[i] == 0) ? 0 : dp[nxt[i]] + 1;
-        st.push(i);
+    const int MAXN = 10000;
+    vector<string> v;
+    v.reserve(MAXN);
+    for (int half = 1; (int)v.size() < MAXN; half++) {
+        for (int mask = 0; mask < (1 << half) && (int)v.size() < MAXN; mask++) {
+            string a(half, '4');
+            for (int b = 0; b < half; b++)
+                if (mask & (1 << (half - 1 - b))) a[b] = '5';
+            string full = a;
+            full.append(a.rbegin(), a.rend());
+            v.push_back(full);
+        }
+    }
+    // tien xu ly chuoi ghep san de xuat ket qua that nhanh
+    string all;
+    vector<size_t> endPos(MAXN + 1, 0);
+    for (int i = 0; i < MAXN; i++) {
+        if (i) all += ' ';
+        all += v[i];
+        endPos[i + 1] = all.size();
     }
 
+    int T;
+    if (scanf("%d", &T) != 1) return 0;
     string out;
-    while (q--) {
-        int x;
-        cin >> x;
-        out += to_string(dp[x]);
+    while (T--) {
+        int n;
+        if (scanf("%d", &n) != 1) break;
+        if (n > MAXN) n = MAXN;
+        out.append(all, 0, endPos[n]);
         out += '\n';
     }
-    cout << out;
+    fwrite(out.data(), 1, out.size(), stdout);
     return 0;
 }

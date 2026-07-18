@@ -1,4 +1,4 @@
-// BAI 6 - TINH GIA TRI BIEU THUC TIEN TO (prefix), toan hang 1 chu so
+// BAI 6: xau con lien tiep la day ngoac dung co nhieu dau '[' nhat
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -6,34 +6,32 @@ int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    int t;
-    if (!(cin >> t)) return 0;
+    string line, s;
+    if (!getline(cin, line)) return 0;
+    for (char c : line) if (c=='('||c==')'||c=='['||c==']') s += c;
 
-    while (t--) {
-        string e;
-        cin >> e;
-
-        stack<double> st;
-        // tien to: duyet TU PHAI SANG TRAI
-        for (int i = (int)e.size() - 1; i >= 0; i--) {
-            char c = e[i];
-            if (isdigit((unsigned char)c)) {
-                st.push(c - '0');
-            } else if (c=='+'||c=='-'||c=='*'||c=='/') {
-                if (st.size() < 2) break;
-                double a = st.top(); st.pop();          // toan hang trai (o tren)
-                double b = st.top(); st.pop();          // toan hang phai
-                double r = 0;
-                if (c == '+') r = a + b;
-                else if (c == '-') r = a - b;
-                else if (c == '*') r = a * b;
-                else r = (b != 0 ? a / b : 0);
-                st.push(r);
-            }
+    int n = (int)s.size();
+    vector<char> used(n, 0);
+    vector<int> st;
+    for (int i = 0; i < n; i++) {
+        char c = s[i];
+        if (c == '(' || c == '[') st.push_back(i);
+        else if (c == ')') {
+            if (!st.empty() && s[st.back()] == '(') { used[st.back()] = used[i] = 1; st.pop_back(); }
+            else st.clear();               // ngoac dong khong khop -> chan moi ket noi
+        } else { // ']'
+            if (!st.empty() && s[st.back()] == '[') { used[st.back()] = used[i] = 1; st.pop_back(); }
+            else st.clear();
         }
-        double res = st.empty() ? 0 : st.top();
-        long long ans = (long long)trunc(res + (res >= 0 ? 1e-9 : -1e-9));
-        cout << ans << '\n';
     }
+
+    // doan lien tiep dai nhat gom cac vi tri da ghep cap -> dem '['
+    int best = 0, cur = 0;
+    for (int i = 0; i < n; i++) {
+        if (used[i]) { if (s[i] == '[') cur++; }
+        else { best = max(best, cur); cur = 0; }
+    }
+    best = max(best, cur);
+    cout << best << '\n';
     return 0;
 }

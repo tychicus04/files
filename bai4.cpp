@@ -1,4 +1,4 @@
-// BAI 4 - BIEU THUC DUNG: do sau long nhau lon nhat, sai -> -1
+// BAI 4: kiem tra cap ngoac () va [] trong cau van ban
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -6,29 +6,28 @@ int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    int t;
-    if (!(cin >> t)) return 0;
-    cin.ignore();
+    int T;
+    if (!(cin >> T)) return 0;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-    while (t--) {
+    while (T--) {
         string s;
-        getline(cin, s);
+        if (!getline(cin, s)) s.clear();
 
-        int depth = 0, best = 0;
+        vector<char> st;
         bool ok = true;
-
         for (char c : s) {
-            if (c == '(') {
-                depth++;
-                best = max(best, depth);
-            } else if (c == ')') {
-                depth--;
-                if (depth < 0) { ok = false; break; }   // dong truoc khi mo
+            if (c == '(' || c == '[') st.push_back(c);
+            else if (c == ')') {
+                if (st.empty() || st.back() != '(') { ok = false; break; }
+                st.pop_back();
+            } else if (c == ']') {
+                if (st.empty() || st.back() != '[') { ok = false; break; }
+                st.pop_back();
             }
         }
-        if (depth != 0) ok = false;                     // con ngoac mo chua dong
-
-        cout << (ok ? best : -1) << '\n';
+        if (!st.empty()) ok = false;
+        cout << (ok ? "YES" : "NO") << '\n';
     }
     return 0;
 }

@@ -1,38 +1,38 @@
-// BAI 5 - TINH GIA TRI BIEU THUC HAU TO (postfix), toan hang 1 chu so
+// BAI 5: dem cach thay '?' de duoc bieu thuc ngoac dung co BAC = K
+// bac = do sau long nhau lon nhat  =>  dem(bac <= K) - dem(bac <= K-1)
 #include <bits/stdc++.h>
 using namespace std;
+typedef long long ll;
+
+static string S;
+
+// so cach thay '?' de duoc day ngoac dung voi do sau toi da <= m
+ll countAtMost(int m) {
+    if (m < 0) return 0;
+    int n = (int)S.size();
+    vector<ll> dp(m + 2, 0), nd(m + 2, 0);
+    dp[0] = 1;
+    for (int i = 0; i < n; i++) {
+        fill(nd.begin(), nd.end(), 0LL);
+        for (int d = 0; d <= m; d++) {
+            if (!dp[d]) continue;
+            if (S[i] == '(' || S[i] == '?') { if (d + 1 <= m) nd[d + 1] += dp[d]; }
+            if (S[i] == ')' || S[i] == '?') { if (d - 1 >= 0) nd[d - 1] += dp[d]; }
+        }
+        dp.swap(nd);
+    }
+    return dp[0];
+}
 
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    int t;
-    if (!(cin >> t)) return 0;
+    int K;
+    if (!(cin >> K)) return 0;
+    if (!(cin >> S)) S.clear();
 
-    while (t--) {
-        string e;
-        cin >> e;
-
-        stack<double> st;
-        for (char c : e) {
-            if (isdigit((unsigned char)c)) {
-                st.push(c - '0');
-            } else if (c=='+'||c=='-'||c=='*'||c=='/') {
-                if (st.size() < 2) break;               // bieu thuc loi
-                double b = st.top(); st.pop();          // toan hang phai
-                double a = st.top(); st.pop();          // toan hang trai
-                double r = 0;
-                if (c == '+') r = a + b;
-                else if (c == '-') r = a - b;
-                else if (c == '*') r = a * b;
-                else r = (b != 0 ? a / b : 0);
-                st.push(r);
-            }
-        }
-        double res = st.empty() ? 0 : st.top();
-        // "chi lay gia tri phan nguyen" -> cat phan thap phan (huong ve 0)
-        long long ans = (long long)trunc(res + (res >= 0 ? 1e-9 : -1e-9));
-        cout << ans << '\n';
-    }
+    if (S.size() % 2 != 0) { cout << 0 << '\n'; return 0; }
+    cout << countAtMost(K) - countAtMost(K - 1) << '\n';
     return 0;
 }

@@ -1,4 +1,4 @@
-// BAI 2 - DANH SO THU TU CAP DAU NGOAC
+// BAI 2: '(' dung -> 0, ')' dung -> 1, ngoac sai -> -1
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -6,36 +6,32 @@ int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    int t;
-    if (!(cin >> t)) return 0;
-    cin.ignore();
+    int T;
+    if (!(cin >> T)) return 0;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-    string out;
-    while (t--) {
+    while (T--) {
         string s;
-        getline(cin, s);
+        if (!getline(cin, s)) s.clear();
+        int n = (int)s.size();
 
-        stack<int> st;
-        int cnt = 0;                    // so cap ngoac da mo
-        string line;
-
-        for (char c : s) {
-            if (c == '(') {
-                st.push(++cnt);         // mo ngoac -> cap moi
-                line += to_string(cnt);
-                line += ' ';
-            } else if (c == ')') {
-                if (!st.empty()) {      // dong ngoac -> lay so cua cap tuong ung
-                    line += to_string(st.top());
-                    line += ' ';
-                    st.pop();
-                }
+        vector<char> matched(n, 0);
+        vector<int> st;
+        for (int i = 0; i < n; i++) {
+            if (s[i] == '(') st.push_back(i);
+            else if (s[i] == ')') {
+                if (!st.empty()) { matched[st.back()] = 1; matched[i] = 1; st.pop_back(); }
             }
         }
-        if (!line.empty()) line.pop_back();
-        out += line;
-        out += '\n';
+
+        string out;
+        out.reserve(n * 2);
+        for (int i = 0; i < n; i++) {
+            if (s[i] == '(')      out += matched[i] ? "0"  : "-1";
+            else if (s[i] == ')') out += matched[i] ? "1"  : "-1";
+            else                  out += s[i];
+        }
+        cout << out << '\n';
     }
-    cout << out;
     return 0;
 }

@@ -1,40 +1,50 @@
-// BAI 7 - TIEN TO: N token cach nhau boi dau cach, so nhieu chu so / so am
+// BAI 7: dem cap (i,j), i<j sao cho moi phan tu giua i va j deu <= min(A[i],A[j])
+// Ngan xep don dieu khong tang, gom nhom cac gia tri bang nhau.
 #include <bits/stdc++.h>
 using namespace std;
+typedef long long ll;
+
+static char ibuf[1 << 16];
+static size_t ipos = 0, ilen = 0;
+static inline int gc() {
+    if (ipos == ilen) { ilen = fread(ibuf, 1, sizeof(ibuf), stdin); ipos = 0; if (ilen == 0) return -1; }
+    return (unsigned char)ibuf[ipos++];
+}
+static inline bool readInt(ll &out) {
+    int c = gc();
+    while (c != -1 && (c < '0' || c > '9') && c != '-') c = gc();
+    if (c == -1) return false;
+    bool neg = false;
+    if (c == '-') { neg = true; c = gc(); }
+    ll x = 0;
+    while (c >= '0' && c <= '9') { x = x * 10 + (c - '0'); c = gc(); }
+    out = neg ? -x : x;
+    return true;
+}
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
+    ll n;
+    if (!readInt(n)) return 0;
 
-    int t;
-    if (!(cin >> t)) return 0;
+    vector<pair<ll,ll>> st;            // (gia tri, so luong)
+    st.reserve((size_t)n + 1);
+    ll ans = 0;
 
-    while (t--) {
-        int n;
-        cin >> n;
-        vector<string> tok(n);
-        for (auto &x : tok) cin >> x;
-
-        stack<long long> st;
-        for (int i = n - 1; i >= 0; i--) {
-            const string &s = tok[i];
-            // la toan tu <=> do dai 1 va thuoc + - * /
-            bool isOp = (s.size() == 1) &&
-                        (s[0]=='+'||s[0]=='-'||s[0]=='*'||s[0]=='/');
-            if (!isOp) {
-                st.push(stoll(s));                      // "-10" van la so
-            } else {
-                long long a = st.top(); st.pop();
-                long long b = st.top(); st.pop();
-                long long r = 0;
-                if (s[0] == '+') r = a + b;
-                else if (s[0] == '-') r = a - b;
-                else if (s[0] == '*') r = a * b;
-                else r = (b != 0 ? a / b : 0);          // chia nguyen
-                st.push(r);
-            }
+    for (ll i = 0; i < n; i++) {
+        ll a;
+        if (!readInt(a)) break;
+        while (!st.empty() && st.back().first < a) { ans += st.back().second; st.pop_back(); }
+        if (!st.empty() && st.back().first == a) {
+            ans += st.back().second;
+            ll c = st.back().second + 1;
+            st.pop_back();
+            if (!st.empty()) ans++;     // phan tu cao hon o duoi cung nhin thay
+            st.push_back({a, c});
+        } else {
+            if (!st.empty()) ans++;
+            st.push_back({a, 1});
         }
-        cout << st.top() << '\n';
     }
+    printf("%lld\n", ans);
     return 0;
 }
