@@ -1,41 +1,30 @@
-// BAI 9: N so "nguyen thuy" dau tien: so chu so chan, chi gom 4/5, doi xung
-// => sinh nua trai (moi bit: 0->'4', 1->'5') roi lay doi xung guong
+// BAI 10: tong cac "so may man tiep theo" cua moi so trong [a,b]
+// So may man = chi gom chu so 4 va 7. next(n) = so may man nho nhat >= n.
 #include <bits/stdc++.h>
 using namespace std;
+typedef long long ll;
 
 int main() {
-    const int MAXN = 10000;
-    vector<string> v;
-    v.reserve(MAXN);
-    for (int half = 1; (int)v.size() < MAXN; half++) {
-        for (int mask = 0; mask < (1 << half) && (int)v.size() < MAXN; mask++) {
-            string a(half, '4');
-            for (int b = 0; b < half; b++)
-                if (mask & (1 << (half - 1 - b))) a[b] = '5';
-            string full = a;
-            full.append(a.rbegin(), a.rend());
-            v.push_back(full);
+    vector<ll> lucky;
+    for (int len = 1; len <= 10; len++)                 // 4444444444 > 1e9
+        for (int mask = 0; mask < (1 << len); mask++) {
+            ll x = 0;
+            for (int i = 0; i < len; i++)
+                x = x * 10 + (((mask >> (len - 1 - i)) & 1) ? 7 : 4);
+            lucky.push_back(x);
         }
-    }
-    // tien xu ly chuoi ghep san de xuat ket qua that nhanh
-    string all;
-    vector<size_t> endPos(MAXN + 1, 0);
-    for (int i = 0; i < MAXN; i++) {
-        if (i) all += ' ';
-        all += v[i];
-        endPos[i + 1] = all.size();
-    }
+    sort(lucky.begin(), lucky.end());
 
-    int T;
-    if (scanf("%d", &T) != 1) return 0;
-    string out;
-    while (T--) {
-        int n;
-        if (scanf("%d", &n) != 1) break;
-        if (n > MAXN) n = MAXN;
-        out.append(all, 0, endPos[n]);
-        out += '\n';
+    ll a, b;
+    if (!(cin >> a >> b)) return 0;
+
+    ll ans = 0, prev = 0;
+    for (ll Lk : lucky) {
+        ll lo = max(a, prev + 1), hi = min(b, Lk);      // next(n) == Lk voi n in (prev, Lk]
+        if (lo <= hi) ans += (hi - lo + 1) * Lk;
+        prev = Lk;
+        if (prev >= b) break;
     }
-    fwrite(out.data(), 1, out.size(), stdout);
+    cout << ans << '\n';
     return 0;
 }

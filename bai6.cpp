@@ -1,37 +1,37 @@
-// BAI 6: xau con lien tiep la day ngoac dung co nhieu dau '[' nhat
+// BAI 6: Cot i to vang A[i] o tren, xanh M-A[i] o duoi. Hinh chu nhat cung mau lon nhat
+// = max(dien tich lon nhat trong bieu do cot A[], dien tich lon nhat trong bieu do cot (M-A[])).
 #include <bits/stdc++.h>
 using namespace std;
+typedef long long ll;
+
+ll largestRectArea(const vector<ll> &h) {
+    int n = (int)h.size();
+    vector<int> st; st.reserve(n + 1);
+    ll best = 0;
+    for (int i = 0; i <= n; i++) {
+        ll cur = (i == n) ? -1 : h[i];
+        while (!st.empty() && h[st.back()] >= cur) {
+            ll height = h[st.back()];
+            st.pop_back();
+            int left = st.empty() ? -1 : st.back();
+            ll width = i - left - 1;
+            best = max(best, height * width);
+        }
+        st.push_back(i);
+    }
+    return best;
+}
 
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    string line, s;
-    if (!getline(cin, line)) return 0;
-    for (char c : line) if (c=='('||c==')'||c=='['||c==']') s += c;
+    ll M, N;
+    if (!(cin >> M >> N)) return 0;
+    vector<ll> A(N), B(N);
+    for (ll i = 0; i < N; i++) { cin >> A[i]; B[i] = M - A[i]; }
 
-    int n = (int)s.size();
-    vector<char> used(n, 0);
-    vector<int> st;
-    for (int i = 0; i < n; i++) {
-        char c = s[i];
-        if (c == '(' || c == '[') st.push_back(i);
-        else if (c == ')') {
-            if (!st.empty() && s[st.back()] == '(') { used[st.back()] = used[i] = 1; st.pop_back(); }
-            else st.clear();               // ngoac dong khong khop -> chan moi ket noi
-        } else { // ']'
-            if (!st.empty() && s[st.back()] == '[') { used[st.back()] = used[i] = 1; st.pop_back(); }
-            else st.clear();
-        }
-    }
-
-    // doan lien tiep dai nhat gom cac vi tri da ghep cap -> dem '['
-    int best = 0, cur = 0;
-    for (int i = 0; i < n; i++) {
-        if (used[i]) { if (s[i] == '[') cur++; }
-        else { best = max(best, cur); cur = 0; }
-    }
-    best = max(best, cur);
-    cout << best << '\n';
+    ll ans = max(largestRectArea(A), largestRectArea(B));
+    cout << ans << '\n';
     return 0;
 }

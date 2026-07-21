@@ -1,64 +1,41 @@
-// BAI 8: Nuoc do tu phia thuong luu (ben trai). Tinh V[i] = the tich nuoc can
-// de nuoc tran qua buc tuong thu i, roi tra loi truy van K bang tim kiem nhi phan.
-//
-// GIA THIET DINH DANG (xem ghi chu trong cau tra loi):
-//   T                      so bo test
-//   N                      so buc tuong
-//   L[1..N]                vi tri (tang dan)
-//   H[1..N]                do cao
-//   Q                      so truy van
-//   K (Q dong)             luu luong nuoc
-// In ra CHI SO (1..N) cua buc tuong cuoi cung bi tran; 0 neu khong buc nao.
+// BAI 9: N so "nguyen thuy" dau tien: so chu so chan, chi gom 4/5, doi xung
+// => sinh nua trai (moi bit: 0->'4', 1->'5') roi lay doi xung guong
 #include <bits/stdc++.h>
 using namespace std;
-typedef long long ll;
-
-struct Rec { ll h, pos, wsum, water; };
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    int T;
-    if (!(cin >> T)) return 0;
-    while (T--) {
-        int n; cin >> n;
-        vector<ll> L(n + 1), H(n + 1);
-        for (int i = 1; i <= n; i++) cin >> L[i];
-        for (int i = 1; i <= n; i++) cin >> H[i];
-
-        vector<ll> V(n + 1, 0);
-        vector<Rec> st;
-        ll W = 0;                              // tong nuoc dang chua
-
-        for (int i = 1; i <= n; i++) {
-            ll h = H[i], pos = L[i], wsum = 0;
-            // cac buc tuong thap hon bi nhan chim -> gop ho nuoc
-            while (!st.empty() && st.back().h <= h) {
-                W    -= st.back().water;
-                wsum += st.back().wsum + st.back().h;
-                st.pop_back();
-            }
-            ll leftPos = st.empty() ? 0 : st.back().pos;   // ho tu [leftPos, pos-1]
-            ll size    = pos - leftPos;
-            ll water   = h * size - (st.empty() ? 0 : h) - wsum;
-            if (water < 0) water = 0;
-            st.push_back({h, pos, wsum, water});
-            W += water;
-            V[i] = max(W, V[i - 1]);
-        }
-
-        int q; cin >> q;
-        while (q--) {
-            ll k; cin >> k;
-            int lo = 1, hi = n, ans = 0;
-            while (lo <= hi) {
-                int mid = (lo + hi) / 2;
-                if (V[mid] <= k) { ans = mid; lo = mid + 1; }
-                else hi = mid - 1;
-            }
-            cout << ans << '\n';           // doi thanh L[ans] neu de bai can VI TRI
+    const int MAXN = 10000;
+    vector<string> v;
+    v.reserve(MAXN);
+    for (int half = 1; (int)v.size() < MAXN; half++) {
+        for (int mask = 0; mask < (1 << half) && (int)v.size() < MAXN; mask++) {
+            string a(half, '4');
+            for (int b = 0; b < half; b++)
+                if (mask & (1 << (half - 1 - b))) a[b] = '5';
+            string full = a;
+            full.append(a.rbegin(), a.rend());
+            v.push_back(full);
         }
     }
+    // tien xu ly chuoi ghep san de xuat ket qua that nhanh
+    string all;
+    vector<size_t> endPos(MAXN + 1, 0);
+    for (int i = 0; i < MAXN; i++) {
+        if (i) all += ' ';
+        all += v[i];
+        endPos[i + 1] = all.size();
+    }
+
+    int T;
+    if (scanf("%d", &T) != 1) return 0;
+    string out;
+    while (T--) {
+        int n;
+        if (scanf("%d", &n) != 1) break;
+        if (n > MAXN) n = MAXN;
+        out.append(all, 0, endPos[n]);
+        out += '\n';
+    }
+    fwrite(out.data(), 1, out.size(), stdout);
     return 0;
 }
