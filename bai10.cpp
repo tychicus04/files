@@ -1,30 +1,37 @@
-// BAI 10: tong cac "so may man tiep theo" cua moi so trong [a,b]
-// So may man = chi gom chu so 4 va 7. next(n) = so may man nho nhat >= n.
+// BAI 10: Chi phi di chuyen = |hieu gia tri hai o|. Tim tong chi phi nho nhat tu (1,1) den (N,M)
+// voi 3 huong: xuong, phai, cheo xuong-phai. (Luon co duong di nen khong can in -1.)
 #include <bits/stdc++.h>
 using namespace std;
 typedef long long ll;
+const ll INF = LLONG_MAX / 2;
 
 int main() {
-    vector<ll> lucky;
-    for (int len = 1; len <= 10; len++)                 // 4444444444 > 1e9
-        for (int mask = 0; mask < (1 << len); mask++) {
-            ll x = 0;
-            for (int i = 0; i < len; i++)
-                x = x * 10 + (((mask >> (len - 1 - i)) & 1) ? 7 : 4);
-            lucky.push_back(x);
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    if (!(cin >> T)) return 0;
+    while (T--) {
+        int n, m;
+        cin >> n >> m;
+        vector<vector<ll>> A(n, vector<ll>(m));
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < m; j++)
+                cin >> A[i][j];
+
+        vector<vector<ll>> dp(n, vector<ll>(m, INF));
+        dp[0][0] = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (i == 0 && j == 0) continue;
+                ll best = INF;
+                if (i > 0) best = min(best, dp[i - 1][j] + llabs(A[i - 1][j] - A[i][j]));
+                if (j > 0) best = min(best, dp[i][j - 1] + llabs(A[i][j - 1] - A[i][j]));
+                if (i > 0 && j > 0) best = min(best, dp[i - 1][j - 1] + llabs(A[i - 1][j - 1] - A[i][j]));
+                dp[i][j] = best;
+            }
         }
-    sort(lucky.begin(), lucky.end());
-
-    ll a, b;
-    if (!(cin >> a >> b)) return 0;
-
-    ll ans = 0, prev = 0;
-    for (ll Lk : lucky) {
-        ll lo = max(a, prev + 1), hi = min(b, Lk);      // next(n) == Lk voi n in (prev, Lk]
-        if (lo <= hi) ans += (hi - lo + 1) * Lk;
-        prev = Lk;
-        if (prev >= b) break;
+        cout << dp[n - 1][m - 1] << '\n';
     }
-    cout << ans << '\n';
     return 0;
 }
