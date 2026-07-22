@@ -1,85 +1,80 @@
-// BAI 3: Loai bo cac dau ngoac thua (chi co bien hoa va cac phep + -)
+// BAI 3: Do thi vo huong N dinh, M canh.
+// Voi moi dinh tu 2 den N, in ra 2 dong:
+//   - Dong 1: duong di tu dinh 1 den dinh do theo DFS.
+//   - Dong 2: duong di tu dinh do ve 1 theo BFS (duong ngan nhat).
+// Neu khong co duong di thi in ra -1.
 #include <bits/stdc++.h>
 using namespace std;
 
-static string s;
-static size_t p;
+static vector<vector<int>> adj;
+static vector<int> dpar;     // cha trong cay DFS xuat phat tu 1
+static vector<char> dvis;
 
-struct Expr;
-using PE = shared_ptr<Expr>;
-struct Term { bool isVar; char var; PE inner; };
-struct Expr { vector<char> ops; vector<Term> terms; };
-
-PE parseExpr();
-
-Term parseTerm() {
-    Term t; t.isVar = true; t.var = 0; t.inner = nullptr;
-    if (p < s.size() && s[p] == '(') {
-        ++p;
-        t.isVar = false;
-        t.inner = parseExpr();
-        if (p < s.size() && s[p] == ')') ++p;
-    } else if (p < s.size()) {
-        t.var = s[p++];
-    }
-    return t;
-}
-
-PE parseExpr() {
-    PE e = make_shared<Expr>();
-    char op = '+';
-    if (p < s.size() && (s[p] == '+' || s[p] == '-')) op = s[p++];
-    e->ops.push_back(op);
-    e->terms.push_back(parseTerm());
-    while (p < s.size() && (s[p] == '+' || s[p] == '-')) {
-        e->ops.push_back(s[p++]);
-        e->terms.push_back(parseTerm());
-    }
-    return e;
-}
-
-// sau khi rut gon, bieu thuc co nhieu hon 1 hang tu o muc ngoai cung?
-bool multi(const PE &e) {
-    if (e->terms.size() > 1) return true;
-    if (e->terms[0].isVar) return false;
-    return multi(e->terms[0].inner);
-}
-
-string render(const PE &e) {
-    string res;
-    for (size_t i = 0; i < e->terms.size(); ++i) {
-        char op = e->ops[i];
-        if (i > 0) res += op;
-        else if (op == '-') res += '-';
-
-        const Term &t = e->terms[i];
-        if (t.isVar) res += t.var;
-        else {
-            string in = render(t.inner);
-            // chi giu ngoac khi dung sau dau '-' va ben trong con phep toan
-            if (op == '-' && multi(t.inner)) { res += '('; res += in; res += ')'; }
-            else res += in;
-        }
-    }
-    return res;
+void dfs(int u) {
+    dvis[u] = 1;
+    for (int v : adj[u])
+        if (!dvis[v]) { dpar[v] = u; dfs(v); }
 }
 
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    int m;
-    if (!(cin >> m)) return 0;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    int N, M;
+    if (!(cin >> N >> M)) return 0;
+    adj.assign(N + 1, {});
+    for (int i = 0; i < M; i++) {
+        int a, b;
+        cin >> a >> b;
+        adj[a].push_back(b);
+        adj[b].push_back(a);
+    }
+    for (int i = 1; i <= N; i++)
+        sort(adj[i].begin(), adj[i].end());
 
-    while (m--) {
-        string line;
-        if (!getline(cin, line)) break;
-        s.clear();
-        for (char c : line) if (!isspace((unsigned char)c)) s += c;
-        if (s.empty()) { cout << '\n'; continue; }
-        p = 0;
-        cout << render(parseExpr()) << '\n';
+    // DFS tu dinh 1
+    dpar.assign(N + 1, -1);
+    dvis.assign(N + 1, 0);
+    dfs(1);
+
+    // BFS tu dinh 1 (de lay duong ngan nhat)
+    vector<int> bpar(N + 1, -1);
+    vector<char> bvis(N + 1, 0);
+    queue<int> q;
+    q.push(1);
+    bvis[1] = 1;
+    while (!q.empty()) {
+        int x = q.front(); q.pop();
+        for (int y : adj[x])
+            if (!bvis[y]) { bvis[y] = 1; bpar[y] = x; q.push(y); }
+    }
+
+    for (int v = 2; v <= N; v++) {
+        // Dong 1: duong di 1 -> v theo DFS
+        if (!dvis[v]) {
+            cout << "-1\n";
+        } else {
+            vector<int> p;
+            for (int x = v; x != -1; x = dpar[x]) p.push_back(x);
+            reverse(p.begin(), p.end());
+            for (size_t i = 0; i < p.size(); i++) {
+                if (i) cout << ' ';
+                cout << p[i];
+            }
+            cout << '\n';
+        }
+        // Dong 2: duong di v -> 1 theo BFS
+        if (!bvis[v]) {
+            cout << "-1\n";
+        } else {
+            vector<int> p;
+            for (int x = v; x != -1; x = bpar[x]) p.push_back(x); // da la v ... 1
+            for (size_t i = 0; i < p.size(); i++) {
+                if (i) cout << ' ';
+                cout << p[i];
+            }
+            cout << '\n';
+        }
     }
     return 0;
 }
